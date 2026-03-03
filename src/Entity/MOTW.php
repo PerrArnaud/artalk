@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MOTWRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -25,6 +27,17 @@ class MOTW
 
     #[ORM\Column(length: 255)]
     private ?string $Visual = null;
+
+    /**
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'mOTW')]
+    private Collection $Reply;
+
+    public function __construct()
+    {
+        $this->Reply = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -75,6 +88,36 @@ class MOTW
     public function setVisual(string $Visual): static
     {
         $this->Visual = $Visual;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getReply(): Collection
+    {
+        return $this->Reply;
+    }
+
+    public function addReply(Comment $reply): static
+    {
+        if (!$this->Reply->contains($reply)) {
+            $this->Reply->add($reply);
+            $reply->setMOTW($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReply(Comment $reply): static
+    {
+        if ($this->Reply->removeElement($reply)) {
+            // set the owning side to null (unless already changed)
+            if ($reply->getMOTW() === $this) {
+                $reply->setMOTW(null);
+            }
+        }
 
         return $this;
     }
