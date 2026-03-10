@@ -10,11 +10,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+
 
 final class RegisterController extends AbstractController
 {
     #[Route('/register', name: 'app_register')]
-    public function index(Request $request, EntityManagerInterface $entityManager): Response
+    public function index(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $form = $this->createForm(RegisterType::class);
         $form->handleRequest($request);
@@ -25,8 +27,9 @@ final class RegisterController extends AbstractController
             $user = new User();
             $user->setName($data['username']);
             $user->setEmail($data['email']);
-            // TODO: Hash le mot de passe avant de sauvegarder
-            $user->setPassword($data['password']);
+            // Hash le mot de passe avant de sauvegarder
+            $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
+            $user->setPassword($hashedPassword);
             $user->setRole('ROLE_USER');
             
             $entityManager->persist($user);

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Inscription{% endblock %}
+{% block title %}ArTalk - Register{% endblock %}
 
 {% block body %}
 <style>
@@ -100,16 +100,10 @@
         </div>
         
         <div class="form-group">
-            {{ form_label(registerForm.password) }}
             {{ form_widget(registerForm.password) }}
             {{ form_errors(registerForm.password) }}
         </div>
         
-        <div class="form-group">
-            {{ form_label(registerForm.confirm_password) }}
-            {{ form_widget(registerForm.confirm_password) }}
-            {{ form_errors(registerForm.confirm_password) }}
-        </div>
         
         <button type="submit" class="btn-submit">S'inscrire</button>
     {{ form_end(registerForm) }}

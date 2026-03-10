@@ -6,6 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -32,23 +33,23 @@ class RegisterType extends AbstractType
                 'constraints' => [new Assert\Email()]
                 ],
             )
-            ->add('password', PasswordType::class, [
-                'label' => 'Password',
-                'attr' => [
-                    'placeholder' => 'Enter your password',
+            ->add('password', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'first_options' => [
+                    'label' => 'Password',
+                    'attr' => [
+                        'placeholder' => 'Enter your password',
+                    ],
+                ],
+                'second_options' => [
+                    'label' => 'Confirm Password',
+                    'attr' => [
+                        'placeholder' => 'Confirm your password',
+                    ],
                 ],
                 'required' => true,
                 'constraints' => [new Assert\Length(min: 8)],
-            ])
-            ->add('confirm_password', PasswordType::class, [
-                'label' => 'Confirm Password',
-                'attr' => [
-                    'placeholder' => 'Confirm your password',
-                ],
-                'required' => true,
-                'constraints' => [new Assert\EqualTo(propertyPath: 'password', message: 'Passwords do not match')]
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
