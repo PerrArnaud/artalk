@@ -19,22 +19,14 @@ class LoginType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Enter your username or email address',
                 ],
-                'constraints' => [
-                    new NotBlank(
-
-                    ),
-                ],
+                'required' => true,
             ])
             ->add('Password', PasswordType::class, [
                 'label' => 'Password',
                 'attr' => [
                     'placeholder' => 'Enter your password',
                 ],
-                'constraints' => [
-                    new NotBlank(
-
-                    ),
-                ],
+                'required' => true,
             ])
         ;
     }

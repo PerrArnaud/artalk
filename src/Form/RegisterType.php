@@ -38,13 +38,7 @@ class RegisterType extends AbstractType
                     'placeholder' => 'Enter your password',
                 ],
                 'required' => true,
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length([
-                        'min' => 14,
-                        'minMessage' => 'Your password should be at least {{ limit }} characters',
-                    ]),
-                ],
+                'constraints' => [new Assert\Length(min: 8)],
             ])
             ->add('confirm_password', PasswordType::class, [
                 'label' => 'Confirm Password',
@@ -52,13 +46,7 @@ class RegisterType extends AbstractType
                     'placeholder' => 'Confirm your password',
                 ],
                 'required' => true,
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\EqualTo([
-                        'propertyPath' => 'password',
-                        'message' => 'Passwords do not match',
-                    ]),
-                ],
+                'constraints' => [new Assert\EqualTo(propertyPath: 'password', message: 'Passwords do not match')]
             ])
         ;
     }
