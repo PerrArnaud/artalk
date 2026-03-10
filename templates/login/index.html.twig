@@ -1,20 +1,119 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello LoginController!{% endblock %}
+{% block title %}Connexion{% endblock %}
 
 {% block body %}
 <style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+    .login-container {
+        max-width: 450px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .login-container h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .btn-submit:hover {
+        background-color: #2980b9;
+    }
+    
+    .register-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+    
+    .register-link a {
+        color: #3498db;
+        text-decoration: none;
+    }
+    
+    .register-link a:hover {
+        text-decoration: underline;
+    }
+    
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 5px;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
 </style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/app/src/Controller/LoginController.php</code></li>
-        <li>Your template at <code>/app/templates/login/index.html.twig</code></li>
-    </ul>
+<div class="login-container">
+    <h1>Connexion</h1>
+    
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    
+    {{ form_start(loginForm) }}
+        <div class="form-group">
+            {{ form_label(loginForm.Identifiant) }}
+            {{ form_widget(loginForm.Identifiant) }}
+            {{ form_errors(loginForm.Identifiant) }}
+        </div>
+        
+        <div class="form-group">
+            {{ form_label(loginForm.Password) }}
+            {{ form_widget(loginForm.Password) }}
+            {{ form_errors(loginForm.Password) }}
+        </div>
+        
+        <button type="submit" class="btn-submit">Se connecter</button>
+    {{ form_end(loginForm) }}
+    
+    <div class="register-link">
+        <p>Vous n'avez pas de compte ? <a href="{{ path('app_register') }}">Créer un compte</a></p>
+    </div>
 </div>
 {% endblock %}

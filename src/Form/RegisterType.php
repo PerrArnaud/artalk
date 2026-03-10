@@ -3,8 +3,12 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class RegisterType extends AbstractType
 {
@@ -16,42 +20,27 @@ class RegisterType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Enter your username',
                 ],
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please enter a username',
-                    ]),
-                    new Length([
-                        'min' => 3,
-                        'minMessage' => 'Your username should be at least {{ limit }} characters',
-                        'max' => 20,
-                        'maxMessage' => 'Your username should not be longer than {{ limit }} characters',
-                    ]),
-                ],
+                'required' => true,
+                'constraints' => [new Assert\Length(min: 3, max: 20)],
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
                 'attr' => [
                     'placeholder' => 'Enter your email address',
                 ],
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please enter an email address',
-                    ]),
-                    new Email([
-                        'message' => 'Please enter a valid email address',
-                    ]),
+                'required' => true,
+                'constraints' => [new Assert\Email()]
                 ],
-            ])
+            )
             ->add('password', PasswordType::class, [
                 'label' => 'Password',
                 'attr' => [
                     'placeholder' => 'Enter your password',
                 ],
+                'required' => true,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please enter a password',
-                    ]),
-                    new Length([
+                    new Assert\NotBlank(),
+                    new Assert\Length([
                         'min' => 14,
                         'minMessage' => 'Your password should be at least {{ limit }} characters',
                     ]),
@@ -62,11 +51,10 @@ class RegisterType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Confirm your password',
                 ],
+                'required' => true,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please confirm your password',
-                    ]),
-                    new EqualTo([
+                    new Assert\NotBlank(),
+                    new Assert\EqualTo([
                         'propertyPath' => 'password',
                         'message' => 'Passwords do not match',
                     ]),
