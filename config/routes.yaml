@@ -9,3 +9,7 @@
 
 controllers:
     resource: routing.controllers
+
+forum_posts:
+    path: /forum/{slug}
+    controller: App\Controller\ForumController::show

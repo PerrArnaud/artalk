@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MOTW index{% endblock %}
+
+{% block body %}
+    <h1>Message Of The Week index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Artist</th>
+                <th>Visual</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for m_o_t_w in m_o_t_ws %}
+            <tr>
+                <td>{{ m_o_t_w.id }}</td>
+                <td>{{ m_o_t_w.Name }}</td>
+                <td>{{ m_o_t_w.Date ? m_o_t_w.Date|date('Y-m-d') : '' }}</td>
+                <td>{{ m_o_t_w.Artist }}</td>
+                <td>{{ m_o_t_w.Visual }}</td>
+                <td>
+                    <a href="{{ path('app_post_crud_show', {'id': m_o_t_w.id}) }}">show</a>
+                    <a href="{{ path('app_post_crud_edit', {'id': m_o_t_w.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_post_crud_new') }}">Create new</a>
+{% endblock %}

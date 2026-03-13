@@ -27,6 +27,9 @@ class Comment
     #[ORM\ManyToOne(inversedBy: 'Reply')]
     private ?MOTW $mOTW = null;
 
+    #[ORM\ManyToOne(inversedBy: 'Comments')]
+    private ?User $user = null;
+
     public function __construct()
     {
         $this->Reply = new ArrayCollection();
@@ -87,6 +90,18 @@ class Comment
     public function setMOTW(?MOTW $mOTW): static
     {
         $this->mOTW = $mOTW;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

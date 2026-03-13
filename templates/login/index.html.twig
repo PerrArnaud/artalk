@@ -87,30 +87,47 @@
         color: #155724;
         border: 1px solid #c3e6cb;
     }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
 </style>
 
 <div class="login-container">
     <h1>Connexion</h1>
     
+    {% if error %}
+        <div class="alert alert-error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+    
     {% for message in app.flashes('success') %}
         <div class="alert alert-success">{{ message }}</div>
     {% endfor %}
     
-    {{ form_start(loginForm) }}
+    <form method="post" action="{{ path('app_login') }}">
         <div class="form-group">
-            {{ form_label(loginForm.Identifiant) }}
-            {{ form_widget(loginForm.Identifiant) }}
-            {{ form_errors(loginForm.Identifiant) }}
+            <label for="username">Email</label>
+            <input type="email" 
+                   id="username" 
+                   name="_username" 
+                   value="{{ last_username }}" 
+                   placeholder="Entrez votre adresse email"
+                   required>
         </div>
         
         <div class="form-group">
-            {{ form_label(loginForm.Password) }}
-            {{ form_widget(loginForm.Password) }}
-            {{ form_errors(loginForm.Password) }}
+            <label for="password">Mot de passe</label>
+            <input type="password" 
+                   id="password" 
+                   name="_password" 
+                   placeholder="Entrez votre mot de passe"
+                   required>
         </div>
         
         <button type="submit" class="btn-submit">Se connecter</button>
-    {{ form_end(loginForm) }}
+    </form>
     
     <div class="register-link">
         <p>Vous n'avez pas de compte ? <a href="{{ path('app_register') }}">Créer un compte</a></p>

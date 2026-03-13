@@ -3,28 +3,27 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class LoginType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('Identifiant', TextType::class, [
-                'label' => 'Username or Email',
+            ->add('email', EmailType::class, [
+                'label' => 'Email',
                 'attr' => [
-                    'placeholder' => 'Enter your username or email address',
+                    'placeholder' => 'Entrez votre adresse email',
                 ],
                 'required' => true,
             ])
-            ->add('Password', PasswordType::class, [
-                'label' => 'Password',
+            ->add('password', PasswordType::class, [
+                'label' => 'Mot de passe',
                 'attr' => [
-                    'placeholder' => 'Enter your password',
+                    'placeholder' => 'Entrez votre mot de passe',
                 ],
                 'required' => true,
             ])
@@ -34,7 +33,9 @@ class LoginType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            // Configure your form options here
+            'csrf_protection' => true,
+            'csrf_field_name' => '_csrf_token',
+            'csrf_token_id'   => 'authenticate',
         ]);
     }
 }

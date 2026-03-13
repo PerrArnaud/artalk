@@ -34,6 +34,9 @@ class MOTW
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'mOTW')]
     private Collection $Reply;
 
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTime $DatePost = null;
+
     public function __construct()
     {
         $this->Reply = new ArrayCollection();
@@ -118,6 +121,18 @@ class MOTW
                 $reply->setMOTW(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDatePost(): ?\DateTime
+    {
+        return $this->DatePost;
+    }
+
+    public function setDatePost(\DateTime $DatePost): static
+    {
+        $this->DatePost = $DatePost;
 
         return $this;
     }

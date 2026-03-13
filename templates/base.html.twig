@@ -73,7 +73,12 @@
                 <a href="{{ path('app_forum') }}">Forum</a>
             </div>
             <div>
-                <a href="{{ path('app_login') }}" class="btn-login">Connexion</a>
+                {% if app.user %}
+                    <span style="color: white; margin-right: 1rem;">Bienvenue, {{ app.user.name }}</span>
+                    <a href="{{ path('app_logout') }}" class="btn-login">Déconnexion</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="btn-login">Connexion</a>
+                {% endif %}
             </div>
         </nav>
         
