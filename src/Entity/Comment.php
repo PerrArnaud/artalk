@@ -15,6 +15,9 @@ class Comment
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(type: 'text')]
+    private ?string $content = null;
+
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'Reply')]
     private ?self $comment = null;
 
@@ -102,6 +105,18 @@ class Comment
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getContent(): ?string
+    {
+        return $this->content;
+    }
+
+    public function setContent(string $content): static
+    {
+        $this->content = $content;
 
         return $this;
     }

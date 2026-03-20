@@ -1,0 +1,274 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ motw.name }} - {{ motw.artist }}{% endblock %}
+
+{% block body %}
+<style>
+    .motw-container {
+        max-width: 900px;
+        margin: 2em auto;
+        padding: 0 20px;
+    }
+    
+    .motw-detail {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .motw-header {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 20px;
+    }
+    
+    .motw-visual-large {
+        width: 250px;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 64px;
+        color: #999;
+    }
+    
+    .motw-visual-large img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .motw-info {
+        flex: 1;
+    }
+    
+    .motw-title {
+        font-size: 32px;
+        font-weight: bold;
+        margin: 0 0 15px 0;
+        color: #333;
+    }
+    
+    .motw-artist {
+        font-size: 24px;
+        color: #666;
+        margin-bottom: 15px;
+    }
+    
+    .motw-date {
+        font-size: 14px;
+        color: #999;
+        margin-bottom: 5px;
+    }
+    
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    
+    .back-link:hover {
+        text-decoration: underline;
+    }
+    
+    .comments-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .comments-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    
+    .comment {
+        border-bottom: 1px solid #eee;
+        padding: 20px 0;
+    }
+    
+    .comment:last-child {
+        border-bottom: none;
+    }
+    
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .comment-author {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .comment-date {
+        color: #999;
+        font-size: 14px;
+    }
+    
+    .comment-content {
+        color: #555;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+    
+    .no-comments {
+        color: #999;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .comment-form {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 30px;
+    }
+    
+    .comment-form h3 {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+    
+    .btn-submit {
+        background: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .btn-submit:hover {
+        background: #0056b3;
+    }
+    
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+
+<div class="motw-container">
+    <a href="{{ path('app_forum') }}" class="back-link">← Retour au forum</a>
+    
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-error">{{ message }}</div>
+    {% endfor %}
+    
+    <div class="motw-detail">
+        <div class="motw-header">
+            <div class="motw-visual-large">
+                {% if motw.visual and motw.visual != '' %}
+                    <img src="{{ motw.visual }}" alt="{{ motw.name }}" onerror="this.style.display='none'; this.parentElement.innerHTML='🎵';">
+                {% else %}
+                    🎵
+                {% endif %}
+            </div>
+            <div class="motw-info">
+                <h1 class="motw-title">{{ motw.name }}</h1>
+                <div class="motw-artist">Par {{ motw.artist }}</div>
+                <div class="motw-date">Date de sortie: {{ motw.date|date('d/m/Y') }}</div>
+                <div class="motw-date">Publié le: {{ motw.datePost|date('d/m/Y') }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="comments-section">
+        <h2 class="comments-title">Commentaires ({{ motw.reply|length }})</h2>
+        
+        {% if motw.reply is empty %}
+            <div class="no-comments">
+                Soyez le premier à commenter cette musique !
+            </div>
+        {% else %}
+            {% for comment in motw.reply %}
+                <div class="comment">
+                    <div class="comment-header">
+                        <span class="comment-author">
+                            {{ comment.user ? comment.user.name : 'Utilisateur inconnu' }}
+                        </span>
+                    </div>
+                    <div class="comment-content">{{ comment.content }}</div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    <div class="comment-form">
+        <h3>Ajouter un commentaire</h3>
+        
+        {% if app.user %}
+            {{ form_start(commentForm) }}
+                <div class="form-group">
+                    {{ form_label(commentForm.content) }}
+                    {{ form_widget(commentForm.content, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(commentForm.content) }}
+                </div>
+                <button type="submit" class="btn-submit">Publier le commentaire</button>
+            {{ form_end(commentForm) }}
+        {% else %}
+            <p>Vous devez être <a href="{{ path('app_login') }}">connecté</a> pour commenter.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

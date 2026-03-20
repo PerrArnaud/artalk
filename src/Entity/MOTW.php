@@ -25,9 +25,6 @@ class MOTW
     #[ORM\Column(length: 255)]
     private ?string $Artist = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $Visual = null;
-
     /**
      * @var Collection<int, Comment>
      */
@@ -36,6 +33,12 @@ class MOTW
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $DatePost = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $visual = null;
+
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $slug = null;
 
     public function __construct()
     {
@@ -85,12 +88,12 @@ class MOTW
 
     public function getVisual(): ?string
     {
-        return $this->Visual;
+        return $this->visual;
     }
 
-    public function setVisual(string $Visual): static
+    public function setVisual(?string $visual): static
     {
-        $this->Visual = $Visual;
+        $this->visual = $visual;
 
         return $this;
     }
@@ -133,6 +136,18 @@ class MOTW
     public function setDatePost(\DateTime $DatePost): static
     {
         $this->DatePost = $DatePost;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): static
+    {
+        $this->slug = $slug;
 
         return $this;
     }
