@@ -1,0 +1,302 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des commentaires - Administration{% endblock %}
+
+{% block body %}
+<style>
+    .admin-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .admin-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+    }
+    
+    .back-link {
+        display: inline-block;
+        margin-bottom: 1rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .back-link:hover {
+        text-decoration: underline;
+    }
+    
+    .filter-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #667eea;
+        background: white;
+        color: #667eea;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    
+    .filter-btn:hover {
+        background: #667eea;
+        color: white;
+    }
+    
+    .filter-btn.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .comments-table {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    thead {
+        background: #f8f9fa;
+    }
+    
+    th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: top;
+    }
+    
+    tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .comment-content-preview {
+        max-width: 400px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #555;
+        line-height: 1.4;
+    }
+    
+    .comment-author {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .comment-date {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-validated {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .btn {
+        padding: 0.4rem 0.8rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    
+    .btn-validate {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-validate:hover {
+        background: #218838;
+    }
+    
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background: #c82333;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .no-comments {
+        padding: 3rem;
+        text-align: center;
+        color: #7f8c8d;
+    }
+    
+    .motw-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .motw-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="admin-container">
+    <a href="{{ path('app_admin') }}" class="back-link">← Retour au panneau d'administration</a>
+    
+    <div class="admin-header">
+        <h1>💬 Gestion des Commentaires</h1>
+    </div>
+    
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    
+    <div class="filter-section">
+        <div class="filter-buttons">
+            <a href="{{ path('app_admin_comments', {'filter': 'all'}) }}" class="filter-btn {{ filter == 'all' ? 'active' : '' }}">
+                Tous les commentaires
+            </a>
+            <a href="{{ path('app_admin_comments', {'filter': 'pending'}) }}" class="filter-btn {{ filter == 'pending' ? 'active' : '' }}">
+                En attente de validation
+            </a>
+            <a href="{{ path('app_admin_comments', {'filter': 'validated'}) }}" class="filter-btn {{ filter == 'validated' ? 'active' : '' }}">
+                Validés
+            </a>
+        </div>
+    </div>
+    
+    <div class="comments-table">
+        {% if comments is empty %}
+            <div class="no-comments">
+                <p>Aucun commentaire à afficher pour ce filtre.</p>
+            </div>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Auteur</th>
+                        <th>Contenu</th>
+                        <th>Publication</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comment in comments %}
+                        <tr>
+                            <td>
+                                <div class="comment-author">
+                                    {{ comment.user ? comment.user.name : 'Utilisateur inconnu' }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="comment-content-preview">
+                                    {{ comment.content|length > 100 ? comment.content|slice(0, 100) ~ '...' : comment.content }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if comment.mOTW %}
+                                    <a href="{{ path('app_forum_show', {'slug': comment.mOTW.slug}) }}" class="motw-link" target="_blank">
+                                        {{ comment.mOTW.name }}
+                                    </a>
+                                {% else %}
+                                    <span style="color: #999;">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="comment-date">
+                                    {{ comment.createdAt|date('d/m/Y H:i') }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if comment.validated %}
+                                    <span class="status-badge status-validated">✓ Validé</span>
+                                {% else %}
+                                    <span class="status-badge status-pending">⏳ En attente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    {% if not comment.validated %}
+                                        <form method="post" action="{{ path('app_admin_comment_validate', {'id': comment.id}) }}" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ comment.id) }}">
+                                            <button type="submit" class="btn btn-validate">Valider</button>
+                                        </form>
+                                    {% endif %}
+                                    <form method="post" action="{{ path('app_admin_comment_delete', {'id': comment.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                                        <button type="submit" class="btn btn-delete">Supprimer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -125,6 +125,115 @@
         white-space: pre-wrap;
     }
     
+    .comment-reply {
+        margin-left: 40px;
+        margin-top: 15px;
+        padding-left: 20px;
+        border-left: 3px solid #007bff;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+    }
+    
+    .btn-reply {
+        background: #28a745;
+        color: white;
+        padding: 5px 15px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+    }
+    
+    .btn-reply:hover {
+        background: #218838;
+        color: white;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        list-style: none;
+        padding: 20px 0 0 0;
+        margin: 0;
+        gap: 10px;
+    }
+    
+    .pagination li {
+        display: inline;
+    }
+    
+    .pagination a,
+    .pagination span {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .pagination .current {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .pagination a:hover {
+        background: #e9ecef;
+    }
+    
+    .reply-form-container {
+        display: none;
+        margin-top: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border-left: 3px solid #28a745;
+    }
+    
+    .reply-form-container.active {
+        display: block;
+    }
+    
+    .reply-form-header {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        padding: 5px 15px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+    
+    .btn-cancel:hover {
+        background: #5a6268;
+    }
+    
+    .btn-submit-reply {
+        background: #28a745;
+        color: white;
+        padding: 5px 15px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    
+    .btn-submit-reply:hover {
+        background: #218838;
+    }
+    
     .no-comments {
         color: #999;
         text-align: center;
@@ -234,23 +343,67 @@
     </div>
     
     <div class="comments-section">
-        <h2 class="comments-title">Commentaires ({{ motw.reply|length }})</h2>
+        <h2 class="comments-title">Commentaires ({{ pagination.getTotalItemCount }})</h2>
         
-        {% if motw.reply is empty %}
+        {% if pagination.getTotalItemCount == 0 %}
             <div class="no-comments">
                 Soyez le premier à commenter cette oeuvre !
             </div>
         {% else %}
-            {% for comment in motw.reply %}
+            {% for comment in pagination %}
                 <div class="comment">
                     <div class="comment-header">
                         <span class="comment-author">
                             {{ comment.user ? comment.user.name : 'Utilisateur inconnu' }}
                         </span>
+                        <span class="comment-date">
+                            {{ comment.createdAt|date('d/m/Y à H:i') }}
+                        </span>
                     </div>
                     <div class="comment-content">{{ comment.content }}</div>
+                    
+                    {% if app.user %}
+                        <button type="button" class="btn-reply" onclick="toggleReplyForm({{ comment.id }})">
+                            Répondre
+                        </button>
+                        
+                        {# Inline reply form #}
+                        <div id="reply-form-{{ comment.id }}" class="reply-form-container">
+                            <div class="reply-form-header">Répondre à {{ comment.user ? comment.user.name : 'ce commentaire' }}</div>
+                            <form method="post" action="{{ path('app_forum_show', {'slug': motw.slug}) }}">
+                                <input type="hidden" name="parentCommentId" value="{{ comment.id }}">
+                                <div class="form-group">
+                                    <textarea name="reply_content" class="form-control" rows="3" placeholder="Écrivez votre réponse..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn-submit-reply">Publier la réponse</button>
+                                <button type="button" class="btn-cancel" onclick="toggleReplyForm({{ comment.id }})">Annuler</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                    
+                    {# Display replies (one level deep only) #}
+                    {% if comment.reply is not empty %}
+                        {% for reply in comment.reply %}
+                            <div class="comment-reply">
+                                <div class="comment-header">
+                                    <span class="comment-author">
+                                        {{ reply.user ? reply.user.name : 'Utilisateur inconnu' }}
+                                    </span>
+                                    <span class="comment-date">
+                                        {{ reply.createdAt|date('d/m/Y à H:i') }}
+                                    </span>
+                                </div>
+                                <div class="comment-content">{{ reply.content }}</div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
             {% endfor %}
+            
+            {# Pagination controls #}
+            <div class="navigation">
+                {{ knp_pagination_render(pagination) }}
+            </div>
         {% endif %}
     </div>
     
@@ -271,4 +424,28 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+function toggleReplyForm(commentId) {
+    const formContainer = document.getElementById('reply-form-' + commentId);
+    
+    // Hide all other reply forms
+    document.querySelectorAll('.reply-form-container').forEach(form => {
+        if (form.id !== 'reply-form-' + commentId) {
+            form.classList.remove('active');
+        }
+    });
+    
+    // Toggle current form
+    formContainer.classList.toggle('active');
+    
+    // Focus on textarea when opening
+    if (formContainer.classList.contains('active')) {
+        const textarea = formContainer.querySelector('textarea');
+        if (textarea) {
+            textarea.focus();
+        }
+    }
+}
+</script>
 {% endblock %}
