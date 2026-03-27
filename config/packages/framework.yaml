@@ -2,8 +2,8 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
-    # Trust proxies (ngrok, load balancers, etc.)
-    trusted_proxies: '127.0.0.1,REMOTE_ADDR'
+    # Trust all proxies for development (ngrok, load balancers, etc.)
+    trusted_proxies: '*'
     trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
 
     # Note that the session will be started ONLY if you read or write from it.
