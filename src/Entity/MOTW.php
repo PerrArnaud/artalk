@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MOTWRepository::class)]
 class MOTW
@@ -14,15 +15,19 @@ class MOTW
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['motw:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['motw:read'])]
     private ?string $Name = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['motw:read'])]
     private ?\DateTime $Date = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['motw:read'])]
     private ?string $Artist = null;
 
     /**
@@ -32,12 +37,15 @@ class MOTW
     private Collection $Reply;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['motw:read'])]
     private ?\DateTime $DatePost = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['motw:read'])]
     private ?string $visual = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['motw:read', 'comment:read'])]
     private ?string $slug = null;
 
     public function __construct()
@@ -150,5 +158,21 @@ class MOTW
         $this->slug = $slug;
 
         return $this;
+    }
+
+    #[Groups(['motw:read'])]
+    public function getCommentCount(): int
+    {
+        return $this->Reply->count();
+    }
+
+    #[Groups(['motw:read'])]
+    public function getFullVisualUrl(): ?string
+    {
+        if (!$this->visual) {
+            return null;
+        }
+        // Return relative path - the base URL will be added by the mobile app
+        return '/uploads/images/' . $this->visual;
     }
 }

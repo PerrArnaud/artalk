@@ -6,6 +6,7 @@ use App\Repository\CommentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -14,15 +15,19 @@ class Comment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['comment:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: 'text')]
+    #[Groups(['comment:read'])]
     private ?string $content = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[Groups(['comment:read'])]
     private bool $validated = true;
 
     #[ORM\Column(type: 'datetime_immutable')]
+    #[Groups(['comment:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'Reply')]
@@ -32,12 +37,15 @@ class Comment
      * @var Collection<int, self>
      */
     #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'comment')]
+    #[Groups(['comment:read'])]
     private Collection $Reply;
 
     #[ORM\ManyToOne(inversedBy: 'Reply')]
+    #[Groups(['comment:read'])]
     private ?MOTW $mOTW = null;
 
     #[ORM\ManyToOne(inversedBy: 'Comments')]
+    #[Groups(['comment:read'])]
     private ?User $user = null;
 
     public function __construct()
