@@ -116,6 +116,15 @@ class Comment
 
     public function setContent(string $content): static
     {
+        // Normalise les retours à la ligne Windows/Mac/Linux
+        $content = str_replace(["\r\n", "\r"], "\n", $content);
+
+        // limite à maximum 2 retours à la ligne consécutifs
+        $content = preg_replace("/\n{3,}/", "\n\n", $content);
+
+        // supprime les lignes vides en début et fin
+        $content = trim($content);
+
         $this->content = $content;
 
         return $this;

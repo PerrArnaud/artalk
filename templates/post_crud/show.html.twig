@@ -25,7 +25,13 @@
             </tr>
             <tr>
                 <th>Visual</th>
-                <td>{{ m_o_t_w.visual }}</td>
+                <td>
+                    {% if m_o_t_w.visual %}
+                        <img src="{{ m_o_t_w.visual }}" alt="{{ m_o_t_w.Name }}" style="max-width: 300px; max-height: 300px;">
+                    {% else %}
+                        Aucune image
+                    {% endif %}
+                </td>
             </tr>
         </tbody>
     </table>

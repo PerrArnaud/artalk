@@ -51,10 +51,11 @@ class MOTWType extends AbstractType
                     maxSize: '5M',
                     mimeTypes: [
                         'image/jpeg',
+                        'image/jpg',
                         'image/png',
                         'image/gif',
                     ],
-                    mimeTypesMessage: 'Please upload a valid image file (JPEG, PNG, GIF).'
+                    mimeTypesMessage: 'Please upload a valid image file (JPEG, JPG, PNG, GIF).'
                 ),
             ])
         ;
