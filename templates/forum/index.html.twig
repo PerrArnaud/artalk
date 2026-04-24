@@ -114,11 +114,11 @@
 </style>
 
 <div class="forum-container">
-    <h1>Forum - Musiques de la semaine</h1>
+    <h1>Forum - Oeuvres de la semaine</h1>
     
     {% if motws is empty %}
         <div class="no-motw">
-            <p>Aucune musique de la semaine n'a été publiée pour le moment.</p>
+            <p>Aucune oeuvre de la semaine n'a été publiée pour le moment.</p>
         </div>
     {% else %}
         {% for motw in motws %}
@@ -127,7 +127,7 @@
                     <div class="motw-header">
                         <div class="motw-visual">
                             {% if motw.visual and motw.visual != '' %}
-                                <img src="{{ motw.visual }}" alt="{{ motw.name }}" onerror="this.style.display='none'; this.parentElement.innerHTML='🎵';">
+                                <img src="{{ motw.visual }}" alt="{{ motw.name }}" onerror="this.style.display='none'; this.parentElement.innerHTML='�';">
                             {% else %}
                                 🎵
                             {% endif %}

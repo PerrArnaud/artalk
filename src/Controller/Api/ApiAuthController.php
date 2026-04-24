@@ -15,6 +15,13 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 #[Route('/api')]
 final class ApiAuthController extends AbstractController
 {
+    #[Route('/login', name: 'api_login', methods: ['POST'])]
+    public function login(): never
+    {
+        // Intercepted by the security firewall's json_login handler
+        throw new \LogicException('This should not be reached.');
+    }
+
     #[Route('/register', name: 'api_register', methods: ['POST'])]
     public function register(
         Request $request,
