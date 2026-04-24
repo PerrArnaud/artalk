@@ -19,7 +19,7 @@ final class LoginController extends AbstractController
             if ($this->isGranted('ROLE_ADMIN')) {
                 return $this->redirectToRoute('app_post_crud_index');
             }
-            return $this->redirectToRoute('app_home');
+            return $this->redirectToRoute('app_forum');
         }
 
         // Récupérer l'erreur de connexion s'il y en a une

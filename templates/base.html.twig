@@ -77,6 +77,7 @@
                     <span style="color: white; margin-right: 1rem;">Bienvenue, {{ app.user.name }}</span>
                     <a href="{{ path('app_logout') }}" class="btn-login">Déconnexion</a>
                 {% else %}
+                    <a href="{{ path('app_register') }}" class="btn-login" style="margin-right: 1rem;">Inscription</a>
                     <a href="{{ path('app_login') }}" class="btn-login">Connexion</a>
                 {% endif %}
             </div>

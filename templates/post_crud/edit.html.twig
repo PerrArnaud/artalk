@@ -1,13 +1,132 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit MOTW{% endblock %}
+{% block title %}Modifier — {{ m_o_t_w.Name }}{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    body { background: #f0f2f5; }
+    .form-page-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #3d5166 100%);
+        color: white;
+        padding: 1.75rem 2.5rem;
+    }
+    .form-page-header h1 { font-size: 1.6rem; font-weight: 700; }
+    .form-page-header .breadcrumb { color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .form-page-header .breadcrumb a { color: rgba(255,255,255,0.7); text-decoration: none; }
+    .form-page-header .breadcrumb a:hover { color: white; }
+    .form-container { max-width: 680px; margin: 2.5rem auto; padding: 0 1.5rem; }
+    .form-card {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    .motw-form .form-group { margin-bottom: 1.5rem; }
+    .motw-form label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #7f8c8d;
+        margin-bottom: 0.45rem;
+    }
+    .motw-form input[type="text"],
+    .motw-form input[type="number"],
+    .motw-form select {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 2px solid #e8ecef;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        color: #2c3e50;
+        transition: border-color 0.2s;
+        background: #fafbfc;
+    }
+    .motw-form input:focus,
+    .motw-form select:focus {
+        outline: none;
+        border-color: #3498db;
+        background: white;
+    }
+    .date-row { display: flex; gap: 0.5rem; }
+    .date-row select { flex: 1; }
+    .file-hint { font-size: 0.78rem; color: #95a5a6; margin-top: 0.35rem; }
+    .file-upload-wrapper input[type="file"] {
+        width: 100%;
+        padding: 0.6rem;
+        border: 2px dashed #d5dde3;
+        border-radius: 8px;
+        background: #fafbfc;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+    .motw-form .form-error { color: #e74c3c; font-size: 0.82rem; margin-top: 0.3rem; }
+    .btn-submit {
+        width: 100%;
+        padding: 0.85rem;
+        background: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 0.5rem;
+    }
+    .btn-submit:hover { background: #229954; }
+    .danger-zone {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .danger-zone-label { font-size: 0.9rem; color: #7f8c8d; }
+    .danger-zone-label strong { display: block; color: #e74c3c; margin-bottom: 0.1rem; }
+    .btn-delete-large {
+        background: #e74c3c;
+        color: white;
+        padding: 0.6rem 1.4rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        white-space: nowrap;
+    }
+    .btn-delete-large:hover { background: #c0392b; }
+</style>
+{% endblock %}
 
 {% block body %}
-    <h1>Edit MOTW</h1>
+<div class="form-page-header">
+    <div class="breadcrumb">
+        <a href="{{ path('app_post_crud_index') }}">← Retour à la liste</a>
+        &nbsp;/&nbsp;
+        <a href="{{ path('app_post_crud_show', {'id': m_o_t_w.id}) }}">{{ m_o_t_w.Name }}</a>
+    </div>
+    <h1>Modifier l'œuvre</h1>
+</div>
 
-    {{ include('post_crud/_form.html.twig', {'button_label': 'Update'}) }}
+<div class="form-container">
+    <div class="form-card">
+        {{ include('post_crud/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+    </div>
 
-    <a href="{{ path('app_post_crud_index') }}">back to list</a>
-
-    {{ include('post_crud/_delete_form.html.twig') }}
+    <div class="danger-zone">
+        <div class="danger-zone-label">
+            <strong>Zone de danger</strong>
+            Supprimer définitivement cette œuvre.
+        </div>
+        {{ include('post_crud/_delete_form.html.twig') }}
+    </div>
+</div>
 {% endblock %}

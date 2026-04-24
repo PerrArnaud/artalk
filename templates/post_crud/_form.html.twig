@@ -1,4 +1,28 @@
-{{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'class': 'motw-form'}}) }}
+    <div class="form-group">
+        {{ form_label(form.Name) }}
+        {{ form_widget(form.Name) }}
+        {{ form_errors(form.Name) }}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.Artist) }}
+        {{ form_widget(form.Artist) }}
+        {{ form_errors(form.Artist) }}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.Date) }}
+        <div class="date-row">
+            {{ form_widget(form.Date) }}
+        </div>
+        {{ form_errors(form.Date) }}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.visual) }}
+        <div class="file-upload-wrapper">
+            {{ form_widget(form.visual) }}
+            <p class="file-hint">JPEG, PNG ou GIF — max. 5 Mo</p>
+        </div>
+        {{ form_errors(form.visual) }}
+    </div>
+    <button type="submit" class="btn-submit">{{ button_label|default('Enregistrer') }}</button>
 {{ form_end(form) }}

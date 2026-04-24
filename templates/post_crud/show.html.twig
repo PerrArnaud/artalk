@@ -1,44 +1,151 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}MOTW{% endblock %}
+{% block title %}{{ m_o_t_w.Name }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    body { background: #f0f2f5; }
+
+    .show-container { max-width: 860px; margin: 2.5rem auto; padding: 0 1.5rem; }
+
+    .show-card {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .show-hero {
+        position: relative;
+        width: 100%;
+        max-height: 420px;
+        overflow: hidden;
+        background: #ecf0f1;
+    }
+    .show-hero img {
+        width: 100%;
+        max-height: 420px;
+        object-fit: cover;
+        display: block;
+    }
+    .show-hero-placeholder {
+        height: 240px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #95a5a6;
+        font-size: 1rem;
+    }
+    .show-body { padding: 2rem 2.5rem; }
+    .show-title {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    .show-artist {
+        font-size: 1.1rem;
+        color: #7f8c8d;
+        margin-bottom: 1.25rem;
+    }
+    .show-meta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+    }
+    .show-meta-item {
+        background: #f5f6fa;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        color: #555;
+    }
+    .show-meta-item strong { color: #2c3e50; display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.1rem; }
+
+    .show-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        padding: 1.25rem 2.5rem;
+        border-top: 1px solid #ecf0f1;
+        background: #fafbfc;
+    }
+    .btn-back {
+        color: #7f8c8d;
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-right: auto;
+    }
+    .btn-back:hover { color: #2c3e50; }
+    .btn-edit-large {
+        background: #27ae60;
+        color: white;
+        padding: 0.6rem 1.4rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+    }
+    .btn-edit-large:hover { background: #229954; }
+    .btn-delete-large {
+        background: #e74c3c;
+        color: white;
+        padding: 0.6rem 1.4rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-delete-large:hover { background: #c0392b; }
+</style>
+{% endblock %}
 
 {% block body %}
-    <h1>MOTW</h1>
+<div class="show-container">
+    <div class="show-card">
+        <div class="show-hero">
+            {% if m_o_t_w.visual %}
+                <img src="{{ m_o_t_w.visual }}" alt="{{ m_o_t_w.Name }}">
+            {% else %}
+                <div class="show-hero-placeholder">Aucune image disponible</div>
+            {% endif %}
+        </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ m_o_t_w.id }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ m_o_t_w.Name }}</td>
-            </tr>
-            <tr>
-                <th>Date</th>
-                <td>{{ m_o_t_w.Date ? m_o_t_w.Date|date('Y-m-d') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Artist</th>
-                <td>{{ m_o_t_w.Artist }}</td>
-            </tr>
-            <tr>
-                <th>Visual</th>
-                <td>
-                    {% if m_o_t_w.visual %}
-                        <img src="{{ m_o_t_w.visual }}" alt="{{ m_o_t_w.Name }}" style="max-width: 300px; max-height: 300px;">
-                    {% else %}
-                        Aucune image
-                    {% endif %}
-                </td>
-            </tr>
-        </tbody>
-    </table>
+        <div class="show-body">
+            <div class="show-title">{{ m_o_t_w.Name }}</div>
+            <div class="show-artist">par {{ m_o_t_w.Artist }}</div>
 
-    <a href="{{ path('app_post_crud_index') }}">back to list</a>
+            <div class="show-meta">
+                <div class="show-meta-item">
+                    <strong>Date de l'œuvre</strong>
+                    {{ m_o_t_w.Date ? m_o_t_w.Date|date('d/m/Y') : '—' }}
+                </div>
+                <div class="show-meta-item">
+                    <strong>Date de publication</strong>
+                    {{ m_o_t_w.DatePost ? m_o_t_w.DatePost|date('d/m/Y') : '—' }}
+                </div>
+                <div class="show-meta-item">
+                    <strong>Slug</strong>
+                    {{ m_o_t_w.slug ?? '—' }}
+                </div>
+                <div class="show-meta-item">
+                    <strong>ID</strong>
+                    #{{ m_o_t_w.id }}
+                </div>
+            </div>
+        </div>
 
-    <a href="{{ path('app_post_crud_edit', {'id': m_o_t_w.id}) }}">edit</a>
-
-    {{ include('post_crud/_delete_form.html.twig') }}
+        <div class="show-actions">
+            <a href="{{ path('app_post_crud_index') }}" class="btn-back">← Retour à la liste</a>
+            <a href="{{ path('app_post_crud_edit', {'id': m_o_t_w.id}) }}" class="btn-edit-large">Modifier</a>
+            {{ include('post_crud/_delete_form.html.twig') }}
+        </div>
+    </div>
+</div>
 {% endblock %}
