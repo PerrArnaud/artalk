@@ -25,7 +25,7 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
             return new RedirectResponse($this->router->generate('app_post_crud_index'));
         }
 
-        // Sinon, rediriger vers la page d'accueil
-        return new RedirectResponse($this->router->generate('app_home'));
+        // Sinon, rediriger vers le forum
+        return new RedirectResponse($this->router->generate('app_forum'));
     }
 }
