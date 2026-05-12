@@ -29,24 +29,45 @@
         font-size: 1.2rem;
         opacity: 0.9;
     }
-    
-    .admin-content {
+
+    .admin-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .admin-card {
         background: white;
-        padding: 2rem;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
         text-align: center;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: block;
     }
-    
-    .admin-content h2 {
+
+    .admin-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .admin-card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .admin-card h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1.3rem;
         color: #2c3e50;
-        margin-bottom: 1rem;
     }
-    
-    .admin-content p {
+
+    .admin-card p {
+        margin: 0;
         color: #7f8c8d;
-        font-size: 1.1rem;
-        line-height: 1.6;
+        font-size: 0.95rem;
     }
 </style>
 
@@ -55,13 +76,26 @@
         <h1>🎨 Panneau d'Administration</h1>
         <p class="admin-welcome">Bienvenue, {{ user.name }} !</p>
     </div>
-    
-    <div class="admin-content">
-        <h2>Page en construction</h2>
-        <p>
-            Cette page d'administration est temporaire.<br>
-            Vous pouvez la personnaliser selon vos besoins.
-        </p>
+
+    <div class="admin-grid">
+        <a href="{{ path('app_post_crud_index') }}" class="admin-card">
+            <div class="admin-card-icon">🖼️</div>
+            <h2>Publications</h2>
+            <p>Gérer les œuvres de la semaine (créer, modifier, supprimer)</p>
+        </a>
+
+        <a href="{{ path('app_admin_comments') }}" class="admin-card">
+            <div class="admin-card-icon">💬</div>
+            <h2>Commentaires</h2>
+            <p>Valider ou modérer l'ensemble des commentaires</p>
+        </a>
+
+        <a href="{{ path('app_admin_reports') }}" class="admin-card">
+            <div class="admin-card-icon">🚩</div>
+            <h2>Signalements</h2>
+            <p>Traiter les commentaires signalés par les utilisateurs</p>
+        </a>
     </div>
 </div>
 {% endblock %}
+

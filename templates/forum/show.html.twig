@@ -381,9 +381,10 @@
                         </div>
                     {% endif %}
                     
-                    {# Display replies (one level deep only) #}
+                    {# Display replies (one level deep only), excluding hidden ones #}
                     {% if comment.reply is not empty %}
                         {% for reply in comment.reply %}
+                            {% if not reply.hidden %}
                             <div class="comment-reply">
                                 <div class="comment-header">
                                     <span class="comment-author">
@@ -395,6 +396,7 @@
                                 </div>
                                 <div class="comment-content">{{ reply.content }}</div>
                             </div>
+                            {% endif %}
                         {% endfor %}
                     {% endif %}
                 </div>

@@ -3,9 +3,11 @@
 namespace App\Controller\Api;
 
 use App\Entity\Comment;
+use App\Entity\Report;
 use App\Entity\User;
 use App\Repository\CommentRepository;
 use App\Repository\MOTWRepository;
+use App\Repository\ReportRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -59,18 +61,60 @@ final class ApiCommentController extends AbstractController
         return $this->json([
             'success' => true,
             'data' => [
-                'id'              => $comment->getId(),
-                'content'         => $comment->getContent(),
-                'createdAt'       => $comment->getCreatedAt()?->format(\DateTimeInterface::ATOM),
-                'validated'       => $comment->isValidated(),
-                'user'            => [
+                'id'                    => $comment->getId(),
+                'content'               => $comment->getContent(),
+                'createdAt'             => $comment->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+                'validated'             => $comment->isValidated(),
+                'user'                  => [
                     'id'   => $user->getId(),
                     'name' => $user->getName(),
                 ],
-                'motwSlug'        => $motw->getSlug(),
-                'parentCommentId' => $comment->getComment()?->getId(),
-                'replies'         => [],
+                'motwSlug'              => $motw->getSlug(),
+                'parentCommentId'       => $comment->getComment()?->getId(),
+                'reportedByCurrentUser' => false,
+                'replies'               => [],
             ],
         ], 201);
     }
+
+    #[Route('/comments/{id}/report', name: 'api_comment_report', methods: ['POST'])]
+    public function report(
+        Comment $comment,
+        Request $request,
+        ReportRepository $reportRepository,
+        EntityManagerInterface $em,
+        #[CurrentUser] User $user,
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+        $reason = is_array($data) ? trim((string) ($data['reason'] ?? '')) : '';
+
+        if (!array_key_exists($reason, Report::REASONS)) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Invalid reason. Valid values: ' . implode(', ', array_keys(Report::REASONS)),
+            ], 400);
+        }
+
+        // Prevent the author from reporting their own comment
+        if ($comment->getUser()?->getId() === $user->getId()) {
+            return $this->json(['success' => false, 'message' => 'You cannot report your own comment.'], 403);
+        }
+
+        // Enforce one report per user per comment
+        $existing = $reportRepository->findOneByCommentAndUser($comment, $user);
+        if ($existing !== null) {
+            return $this->json(['success' => false, 'message' => 'You have already reported this comment.'], 409);
+        }
+
+        $report = new Report();
+        $report->setComment($comment);
+        $report->setUser($user);
+        $report->setReason($reason);
+
+        $em->persist($report);
+        $em->flush();
+
+        return $this->json(['success' => true, 'message' => 'Report submitted successfully.'], 201);
+    }
 }
+

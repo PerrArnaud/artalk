@@ -20,9 +20,9 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
         $user = $token->getUser();
         $roles = $user->getRoles();
 
-        // Si l'utilisateur a le rôle ROLE_ADMIN, rediriger vers le CRUD des posts
+        // Si l'utilisateur a le rôle ROLE_ADMIN, rediriger vers le dashboard admin
         if (in_array('ROLE_ADMIN', $roles, true)) {
-            return new RedirectResponse($this->router->generate('app_post_crud_index'));
+            return new RedirectResponse($this->router->generate('app_admin'));
         }
 
         // Sinon, rediriger vers le forum

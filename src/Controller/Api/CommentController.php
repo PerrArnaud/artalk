@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Event\CommentCreatedEvent;
 use App\Repository\CommentRepository;
 use App\Repository\MOTWRepository;
+use App\Repository\ReportRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[Route('/api', name: 'api_')]
 class CommentController extends AbstractController
@@ -24,7 +26,9 @@ class CommentController extends AbstractController
         string $slug,
         Request $request,
         MOTWRepository $motwRepository,
-        CommentRepository $commentRepository
+        CommentRepository $commentRepository,
+        ReportRepository $reportRepository,
+        #[CurrentUser] ?User $currentUser = null
     ): JsonResponse {
         $motw = $motwRepository->findOneBy(['slug' => $slug]);
 
@@ -39,7 +43,7 @@ class CommentController extends AbstractController
         $limit = min(100, max(1, $request->query->getInt('limit', 20)));
         $offset = ($page - 1) * $limit;
 
-        // Get top-level comments (no parent) that are validated
+        // Get top-level comments (no parent) that are validated and not hidden
         $queryBuilder = $commentRepository->createQueryBuilder('c')
             ->leftJoin('c.user', 'u')
             ->leftJoin('c.Reply', 'r')
@@ -47,6 +51,7 @@ class CommentController extends AbstractController
             ->where('c.mOTW = :motw')
             ->andWhere('c.comment IS NULL')
             ->andWhere('c.validated = true')
+            ->andWhere('c.hidden = false')
             ->setParameter('motw', $motw)
             ->orderBy('c.createdAt', 'DESC')
             ->setFirstResult($offset)
@@ -60,23 +65,37 @@ class CommentController extends AbstractController
             ->where('c.mOTW = :motw')
             ->andWhere('c.comment IS NULL')
             ->andWhere('c.validated = true')
+            ->andWhere('c.hidden = false')
             ->setParameter('motw', $motw)
             ->getQuery()
             ->getSingleScalarResult();
 
+        // Collect all comment/reply IDs to look up which ones the user has already reported
+        $allIds = [];
+        foreach ($comments as $comment) {
+            $allIds[] = $comment->getId();
+            foreach ($comment->getReply() as $reply) {
+                $allIds[] = $reply->getId();
+            }
+        }
+        $reportedIds = $currentUser
+            ? $reportRepository->findReportedCommentIdsByUser($currentUser, $allIds)
+            : [];
+        $reportedIdSet = array_flip($reportedIds);
+
         $data = [];
         foreach ($comments as $comment) {
-            $commentData = $this->serializeComment($comment);
-            
-            // Add replies (1 level deep only)
+            $commentData = $this->serializeComment($comment, $reportedIdSet);
+
+            // Add replies (1 level deep only), excluding hidden ones
             $replies = [];
             foreach ($comment->getReply() as $reply) {
-                if ($reply->isValidated()) {
-                    $replies[] = $this->serializeComment($reply);
+                if ($reply->isValidated() && !$reply->isHidden()) {
+                    $replies[] = $this->serializeComment($reply, $reportedIdSet);
                 }
             }
             $commentData['replies'] = $replies;
-            
+
             $data[] = $commentData;
         }
 
@@ -137,7 +156,7 @@ class CommentController extends AbstractController
         // Handle parent comment (for replies)
         if (isset($data['parentCommentId'])) {
             $parentComment = $commentRepository->find($data['parentCommentId']);
-            
+
             if (!$parentComment) {
                 return $this->json([
                     'success' => false,
@@ -174,26 +193,28 @@ class CommentController extends AbstractController
         return $this->json([
             'success' => true,
             'message' => 'Comment created successfully',
-            'data' => $this->serializeComment($comment)
+            'data' => $this->serializeComment($comment, [])
         ], Response::HTTP_CREATED);
     }
 
-    private function serializeComment(Comment $comment): array
+    private function serializeComment(Comment $comment, array $reportedIdSet): array
     {
         $user = $comment->getUser();
         $motw = $comment->getMOTW();
-        
+
         return [
-            'id' => $comment->getId(),
-            'content' => $comment->getContent(),
-            'createdAt' => $comment->getCreatedAt()->format('Y-m-d H:i:s'),
-            'validated' => $comment->isValidated(),
-            'user' => [
-                'id' => $user ? $user->getId() : null,
-                'name' => $user ? $user->getName() : 'Unknown'
+            'id'                    => $comment->getId(),
+            'content'               => $comment->getContent(),
+            'createdAt'             => $comment->getCreatedAt()->format('Y-m-d H:i:s'),
+            'validated'             => $comment->isValidated(),
+            'user'                  => [
+                'id'   => $user ? $user->getId() : null,
+                'name' => $user ? $user->getName() : 'Unknown',
             ],
-            'motwSlug' => $motw ? $motw->getSlug() : null,
-            'parentCommentId' => $comment->getComment() ? $comment->getComment()->getId() : null
+            'motwSlug'              => $motw ? $motw->getSlug() : null,
+            'parentCommentId'       => $comment->getComment() ? $comment->getComment()->getId() : null,
+            'reportedByCurrentUser' => isset($reportedIdSet[$comment->getId()]),
         ];
     }
 }
+

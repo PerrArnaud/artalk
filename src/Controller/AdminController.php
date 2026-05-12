@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Comment;
 use App\Repository\CommentRepository;
+use App\Repository\ReportRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -80,4 +81,45 @@ final class AdminController extends AbstractController
         
         return $this->redirectToRoute('app_admin_comments');
     }
+
+    // ─── Reports ─────────────────────────────────────────────────────────────
+
+    #[Route('/admin/reports', name: 'app_admin_reports')]
+    public function listReports(ReportRepository $reportRepository): Response
+    {
+        $reportedComments = $reportRepository->findReportedCommentsGrouped();
+
+        return $this->render('admin/reports.html.twig', [
+            'reportedComments' => $reportedComments,
+        ]);
+    }
+
+    #[Route('/admin/comments/{id}/hide', name: 'app_admin_comment_hide', methods: ['POST'])]
+    public function hideComment(
+        Comment $comment,
+        EntityManagerInterface $entityManager
+    ): Response
+    {
+        $comment->setHidden(true);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le commentaire a été masqué.');
+
+        return $this->redirectToRoute('app_admin_reports');
+    }
+
+    #[Route('/admin/comments/{id}/unhide', name: 'app_admin_comment_unhide', methods: ['POST'])]
+    public function unhideComment(
+        Comment $comment,
+        EntityManagerInterface $entityManager
+    ): Response
+    {
+        $comment->setHidden(false);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le commentaire est à nouveau visible.');
+
+        return $this->redirectToRoute('app_admin_reports');
+    }
 }
+

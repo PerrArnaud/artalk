@@ -93,7 +93,7 @@ final class ApiMOTWController extends AbstractController
         /** @var Comment[] $comments */
         $comments = $em->createQuery(
             'SELECT c FROM App\Entity\Comment c
-             WHERE c.mOTW = :motw AND c.validated = true AND c.comment IS NULL
+             WHERE c.mOTW = :motw AND c.validated = true AND c.hidden = false AND c.comment IS NULL
              ORDER BY c.createdAt ASC'
         )->setParameter('motw', $motw)->getResult();
 
@@ -123,7 +123,7 @@ final class ApiMOTWController extends AbstractController
     {
         $replies = [];
         foreach ($comment->getReply() as $reply) {
-            if ($reply->isValidated()) {
+            if ($reply->isValidated() && !$reply->isHidden()) {
                 $replies[] = [
                     'id'              => $reply->getId(),
                     'content'         => $reply->getContent(),

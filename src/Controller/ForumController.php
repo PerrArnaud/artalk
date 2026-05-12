@@ -104,10 +104,11 @@ final class ForumController extends AbstractController
             return $this->redirectToRoute('app_forum_show', ['slug' => $motw->getSlug()]);
         }
         
-        // Get only parent comments (those without a parent) for pagination
+        // Get only parent comments (those without a parent) for pagination, excluding hidden
         $queryBuilder = $commentRepository->createQueryBuilder('c')
             ->where('c.mOTW = :motw')
             ->andWhere('c.comment IS NULL')
+            ->andWhere('c.hidden = false')
             ->setParameter('motw', $motw)
             ->orderBy('c.createdAt', 'DESC');
         

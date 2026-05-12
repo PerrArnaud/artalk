@@ -26,6 +26,9 @@ class Comment
     #[Groups(['comment:read'])]
     private bool $validated = true;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $hidden = false;
+
     #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['comment:read'])]
     private ?\DateTimeImmutable $createdAt = null;
@@ -40,6 +43,12 @@ class Comment
     #[Groups(['comment:read'])]
     private Collection $Reply;
 
+    /**
+     * @var Collection<int, Report>
+     */
+    #[ORM\OneToMany(targetEntity: Report::class, mappedBy: 'comment', orphanRemoval: true)]
+    private Collection $reports;
+
     #[ORM\ManyToOne(inversedBy: 'Reply')]
     #[Groups(['comment:read'])]
     private ?MOTW $mOTW = null;
@@ -51,6 +60,7 @@ class Comment
     public function __construct()
     {
         $this->Reply = new ArrayCollection();
+        $this->reports = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -165,6 +175,47 @@ class Comment
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function isHidden(): bool
+    {
+        return $this->hidden;
+    }
+
+    public function setHidden(bool $hidden): static
+    {
+        $this->hidden = $hidden;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Report>
+     */
+    public function getReports(): Collection
+    {
+        return $this->reports;
+    }
+
+    public function addReport(Report $report): static
+    {
+        if (!$this->reports->contains($report)) {
+            $this->reports->add($report);
+            $report->setComment($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReport(Report $report): static
+    {
+        if ($this->reports->removeElement($report)) {
+            if ($report->getComment() === $this) {
+                $report->setComment(null);
+            }
+        }
 
         return $this;
     }
