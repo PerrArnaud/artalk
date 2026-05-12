@@ -16,28 +16,16 @@ class MOTWRepository extends ServiceEntityRepository
         parent::__construct($registry, MOTW::class);
     }
 
-    //    /**
-    //     * @return MOTW[] Returns an array of MOTW objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('m.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findByArtType(?int $artTypeId): array
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->orderBy('m.DatePost', 'DESC');
 
-    //    public function findOneBySomeField($value): ?MOTW
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if ($artTypeId !== null) {
+            $qb->andWhere('m.artType = :artTypeId')
+               ->setParameter('artTypeId', $artTypeId);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

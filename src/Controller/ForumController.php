@@ -6,6 +6,7 @@ use App\Entity\Comment;
 use App\Entity\MOTW;
 use App\Event\CommentCreatedEvent;
 use App\Form\CommentType;
+use App\Repository\ArtTypeRepository;
 use App\Repository\CommentRepository;
 use App\Repository\MOTWRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,13 +21,17 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ForumController extends AbstractController
 {
     #[Route('/forum', name: 'app_forum')]
-    public function index(MOTWRepository $motwRepository): Response
+    public function index(MOTWRepository $motwRepository, ArtTypeRepository $artTypeRepository, Request $request): Response
     {
-        // Récupérer tous les MOTW, triés par date de post (plus récent en premier)
-        $motws = $motwRepository->findBy([], ['DatePost' => 'DESC']);
+        $artTypeId = $request->query->get('artType') ? (int) $request->query->get('artType') : null;
+
+        $motws = $motwRepository->findByArtType($artTypeId);
+        $artTypes = $artTypeRepository->findBy([], ['name' => 'ASC']);
 
         return $this->render('forum/index.html.twig', [
             'motws' => $motws,
+            'artTypes' => $artTypes,
+            'selectedArtType' => $artTypeId,
         ]);
     }
 

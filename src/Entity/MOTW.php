@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use App\Entity\ArtType;
 
 #[ORM\Entity(repositoryClass: MOTWRepository::class)]
 class MOTW
@@ -47,6 +48,11 @@ class MOTW
     #[ORM\Column(length: 255, unique: true)]
     #[Groups(['motw:read', 'comment:read'])]
     private ?string $slug = null;
+
+    #[ORM\ManyToOne(targetEntity: ArtType::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['motw:read'])]
+    private ?ArtType $artType = null;
 
     public function __construct()
     {
@@ -174,5 +180,17 @@ class MOTW
         }
         // Return relative path - the base URL will be added by the mobile app
         return '/uploads/images/' . $this->visual;
+    }
+
+    public function getArtType(): ?ArtType
+    {
+        return $this->artType;
+    }
+
+    public function setArtType(?ArtType $artType): static
+    {
+        $this->artType = $artType;
+
+        return $this;
     }
 }

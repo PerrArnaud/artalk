@@ -111,11 +111,66 @@
         padding: 40px;
         color: #666;
     }
+
+    .filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        align-items: center;
+    }
+
+    .filter-bar span {
+        font-size: 0.9rem;
+        color: #666;
+        margin-right: 0.25rem;
+    }
+
+    .filter-btn {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        border: 2px solid #007bff;
+        background: white;
+        color: #007bff;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: #007bff;
+        color: white;
+    }
+
+    .motw-art-type {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: #e8f4fd;
+        color: #2980b9;
+        border-radius: 12px;
+        padding: 0.2rem 0.65rem;
+        margin-top: 0.4rem;
+    }
 </style>
 
 <div class="forum-container">
     <h1>Forum - Oeuvres de la semaine</h1>
-    
+
+    <div class="filter-bar">
+        <span>Filtrer :</span>
+        <a href="{{ path('app_forum') }}" class="filter-btn {{ selectedArtType is null ? 'active' : '' }}">Tous</a>
+        {% for artType in artTypes %}
+            <a href="{{ path('app_forum', {artType: artType.id}) }}" class="filter-btn {{ selectedArtType == artType.id ? 'active' : '' }}">
+                {{ artType.name }}
+            </a>
+        {% endfor %}
+    </div>
+
     {% if motws is empty %}
         <div class="no-motw">
             <p>Aucune oeuvre de la semaine n'a été publiée pour le moment.</p>
@@ -138,6 +193,9 @@
                             <div class="motw-date">
                                 Publié le {{ motw.datePost|date('d/m/Y') }}
                             </div>
+                            {% if motw.artType %}
+                                <span class="motw-art-type">{{ motw.artType.name }}</span>
+                            {% endif %}
                         </div>
                     </div>
                 </a>

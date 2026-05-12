@@ -3,12 +3,14 @@
 namespace App\Form;
 
 use App\Entity\MOTW;
+use App\Entity\ArtType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class MOTWType extends AbstractType
@@ -42,6 +44,13 @@ class MOTWType extends AbstractType
                     'placeholder' => 'Enter the artist name',
                 ],
                 'required' => true,
+            ])
+            ->add('artType', EntityType::class, [
+                'class' => ArtType::class,
+                'choice_label' => 'name',
+                'label' => 'Type d\'art',
+                'required' => false,
+                'placeholder' => '— Sélectionner un type d\'art —',
             ])
             ->add('visual', FileType::class, [
                 'label' => 'Visual (Image file)',

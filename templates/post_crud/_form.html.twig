@@ -17,6 +17,11 @@
         {{ form_errors(form.Date) }}
     </div>
     <div class="form-group">
+        {{ form_label(form.artType) }}
+        {{ form_widget(form.artType) }}
+        {{ form_errors(form.artType) }}
+    </div>
+    <div class="form-group">
         {{ form_label(form.visual) }}
         <div class="file-upload-wrapper">
             {{ form_widget(form.visual) }}

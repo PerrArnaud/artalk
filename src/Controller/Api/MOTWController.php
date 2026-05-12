@@ -19,20 +19,28 @@ class MOTWController extends AbstractController
         $page = max(1, $request->query->getInt('page', 1));
         $limit = min(100, max(1, $request->query->getInt('limit', 10)));
         $offset = ($page - 1) * $limit;
+        $artTypeId = $request->query->get('artTypeId') ? (int) $request->query->get('artTypeId') : null;
 
-        // Get all MOTW sorted by datePost descending
-        $queryBuilder = $motwRepository->createQueryBuilder('m')
+        $qb = $motwRepository->createQueryBuilder('m')
             ->orderBy('m.DatePost', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit);
 
-        $motws = $queryBuilder->getQuery()->getResult();
-        
+        if ($artTypeId !== null) {
+            $qb->andWhere('m.artType = :artTypeId')
+               ->setParameter('artTypeId', $artTypeId);
+        }
+
+        $motws = $qb->getQuery()->getResult();
+
         // Get total count for pagination
-        $totalCount = $motwRepository->createQueryBuilder('m')
-            ->select('COUNT(m.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
+        $countQb = $motwRepository->createQueryBuilder('m')
+            ->select('COUNT(m.id)');
+        if ($artTypeId !== null) {
+            $countQb->andWhere('m.artType = :artTypeId')
+                    ->setParameter('artTypeId', $artTypeId);
+        }
+        $totalCount = $countQb->getQuery()->getSingleScalarResult();
 
         $data = [];
         foreach ($motws as $motw) {
@@ -44,7 +52,11 @@ class MOTWController extends AbstractController
                 'datePost' => $motw->getDatePost()->format('Y-m-d'),
                 'slug' => $motw->getSlug(),
                 'visual' => $motw->getFullVisualUrl(),
-                'commentCount' => $motw->getCommentCount()
+                'commentCount' => $motw->getCommentCount(),
+                'artType' => $motw->getArtType() ? [
+                    'id' => $motw->getArtType()->getId(),
+                    'name' => $motw->getArtType()->getName(),
+                ] : null,
             ];
         }
 
