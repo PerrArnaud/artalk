@@ -11,6 +11,9 @@ services:
   php:
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
     environment:
       SERVER_NAME: :80
       DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}

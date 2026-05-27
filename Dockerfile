@@ -49,7 +49,7 @@ COPY --link frankenphp/Caddyfile /etc/frankenphp/Caddyfile
 
 ENTRYPOINT ["docker-entrypoint"]
 
-HEALTHCHECK --start-period=60s CMD curl http://localhost:2019/metrics --silent --show-error --fail --output /dev/null || exit 1
+HEALTHCHECK --start-period=120s CMD curl http://localhost:2019/metrics --silent --show-error --fail --output /dev/null || exit 1
 CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile" ]
 
 # Dev FrankenPHP image
@@ -78,6 +78,11 @@ ENV APP_ENV=prod
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 COPY --link frankenphp/conf.d/20-app.prod.ini $PHP_INI_DIR/app.conf.d/
+
+COPY --link . /app
+
+RUN set -eux; \
+	composer install --no-dev --optimize-autoloader --no-interaction --no-progress
 
 # prevent the reinstallation of vendors at every changes in the source code
 COPY --link composer.* symfony.* ./
