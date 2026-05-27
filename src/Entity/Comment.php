@@ -49,6 +49,12 @@ class Comment
     #[ORM\OneToMany(targetEntity: Report::class, mappedBy: 'comment', orphanRemoval: true)]
     private Collection $reports;
 
+    /**
+     * @var Collection<int, CommentLike>
+     */
+    #[ORM\OneToMany(targetEntity: CommentLike::class, mappedBy: 'comment', orphanRemoval: true)]
+    private Collection $likes;
+
     #[ORM\ManyToOne(inversedBy: 'Reply')]
     #[Groups(['comment:read'])]
     private ?MOTW $mOTW = null;
@@ -61,6 +67,7 @@ class Comment
     {
         $this->Reply = new ArrayCollection();
         $this->reports = new ArrayCollection();
+        $this->likes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -214,6 +221,35 @@ class Comment
         if ($this->reports->removeElement($report)) {
             if ($report->getComment() === $this) {
                 $report->setComment(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CommentLike>
+     */
+    public function getLikes(): Collection
+    {
+        return $this->likes;
+    }
+
+    public function addLike(CommentLike $like): static
+    {
+        if (!$this->likes->contains($like)) {
+            $this->likes->add($like);
+            $like->setComment($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLike(CommentLike $like): static
+    {
+        if ($this->likes->removeElement($like)) {
+            if ($like->getComment() === $this) {
+                $like->setComment(null);
             }
         }
 

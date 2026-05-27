@@ -21,15 +21,28 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ForumController extends AbstractController
 {
     #[Route('/forum', name: 'app_forum')]
-    public function index(MOTWRepository $motwRepository, ArtTypeRepository $artTypeRepository, Request $request): Response
+    public function index(MOTWRepository $motwRepository, ArtTypeRepository $artTypeRepository, Request $request, PaginatorInterface $paginator): Response
     {
         $artTypeId = $request->query->get('artType') ? (int) $request->query->get('artType') : null;
 
-        $motws = $motwRepository->findByArtType($artTypeId);
+        $qb = $motwRepository->createQueryBuilder('m')
+            ->orderBy('m.DatePost', 'DESC');
+
+        if ($artTypeId !== null) {
+            $qb->andWhere('m.artType = :artTypeId')
+               ->setParameter('artTypeId', $artTypeId);
+        }
+
+        $pagination = $paginator->paginate(
+            $qb->getQuery(),
+            $request->query->getInt('page', 1),
+            10
+        );
+
         $artTypes = $artTypeRepository->findBy([], ['name' => 'ASC']);
 
         return $this->render('forum/index.html.twig', [
-            'motws' => $motws,
+            'motws' => $pagination,
             'artTypes' => $artTypes,
             'selectedArtType' => $artTypeId,
         ]);

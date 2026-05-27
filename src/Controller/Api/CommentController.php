@@ -6,6 +6,7 @@ use App\Entity\Comment;
 use App\Entity\MOTW;
 use App\Entity\User;
 use App\Event\CommentCreatedEvent;
+use App\Repository\CommentLikeRepository;
 use App\Repository\CommentRepository;
 use App\Repository\MOTWRepository;
 use App\Repository\ReportRepository;
@@ -28,6 +29,7 @@ class CommentController extends AbstractController
         MOTWRepository $motwRepository,
         CommentRepository $commentRepository,
         ReportRepository $reportRepository,
+        CommentLikeRepository $commentLikeRepository,
         #[CurrentUser] ?User $currentUser = null
     ): JsonResponse {
         $motw = $motwRepository->findOneBy(['slug' => $slug]);
@@ -39,23 +41,31 @@ class CommentController extends AbstractController
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $page = max(1, $request->query->getInt('page', 1));
+        $page  = max(1, $request->query->getInt('page', 1));
         $limit = min(100, max(1, $request->query->getInt('limit', 20)));
         $offset = ($page - 1) * $limit;
+        $sort  = $request->query->get('sort', 'recent'); // 'recent' or 'likes'
 
-        // Get top-level comments (no parent) that are validated and not hidden
+        // Build query for top-level validated, visible comments
         $queryBuilder = $commentRepository->createQueryBuilder('c')
-            ->leftJoin('c.user', 'u')
-            ->leftJoin('c.Reply', 'r')
-            ->leftJoin('r.user', 'ru')
             ->where('c.mOTW = :motw')
             ->andWhere('c.comment IS NULL')
             ->andWhere('c.validated = true')
             ->andWhere('c.hidden = false')
             ->setParameter('motw', $motw)
-            ->orderBy('c.createdAt', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($limit);
+
+        if ($sort === 'likes') {
+            $queryBuilder
+                ->leftJoin('c.likes', 'cl')
+                ->addSelect('COUNT(cl.id) AS HIDDEN likesCount')
+                ->groupBy('c.id')
+                ->orderBy('likesCount', 'DESC')
+                ->addOrderBy('c.createdAt', 'DESC');
+        } else {
+            $queryBuilder->orderBy('c.createdAt', 'DESC');
+        }
 
         $comments = $queryBuilder->getQuery()->getResult();
 
@@ -70,7 +80,7 @@ class CommentController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-        // Collect all comment/reply IDs to look up which ones the user has already reported
+        // Collect all comment/reply IDs to look up which ones the user has already reported or liked
         $allIds = [];
         foreach ($comments as $comment) {
             $allIds[] = $comment->getId();
@@ -83,15 +93,21 @@ class CommentController extends AbstractController
             : [];
         $reportedIdSet = array_flip($reportedIds);
 
+        $likeCountMap = $commentLikeRepository->getLikeCountsByCommentIds($allIds);
+        $likedIds = $currentUser
+            ? $commentLikeRepository->findLikedCommentIdsByUser($currentUser, $allIds)
+            : [];
+        $likedIdSet = array_flip($likedIds);
+
         $data = [];
         foreach ($comments as $comment) {
-            $commentData = $this->serializeComment($comment, $reportedIdSet);
+            $commentData = $this->serializeComment($comment, $reportedIdSet, $likeCountMap, $likedIdSet);
 
             // Add replies (1 level deep only), excluding hidden ones
             $replies = [];
             foreach ($comment->getReply() as $reply) {
                 if ($reply->isValidated() && !$reply->isHidden()) {
-                    $replies[] = $this->serializeComment($reply, $reportedIdSet);
+                    $replies[] = $this->serializeComment($reply, $reportedIdSet, $likeCountMap, $likedIdSet);
                 }
             }
             $commentData['replies'] = $replies;
@@ -193,11 +209,11 @@ class CommentController extends AbstractController
         return $this->json([
             'success' => true,
             'message' => 'Comment created successfully',
-            'data' => $this->serializeComment($comment, [])
+            'data' => $this->serializeComment($comment, [], [], [])
         ], Response::HTTP_CREATED);
     }
 
-    private function serializeComment(Comment $comment, array $reportedIdSet): array
+    private function serializeComment(Comment $comment, array $reportedIdSet, array $likeCountMap = [], array $likedIdSet = []): array
     {
         $user = $comment->getUser();
         $motw = $comment->getMOTW();
@@ -214,6 +230,8 @@ class CommentController extends AbstractController
             'motwSlug'              => $motw ? $motw->getSlug() : null,
             'parentCommentId'       => $comment->getComment() ? $comment->getComment()->getId() : null,
             'reportedByCurrentUser' => isset($reportedIdSet[$comment->getId()]),
+            'likesCount'            => $likeCountMap[$comment->getId()] ?? 0,
+            'likedByCurrentUser'    => isset($likedIdSet[$comment->getId()]),
         ];
     }
 }

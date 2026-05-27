@@ -71,10 +71,11 @@ final class ApiAuthController extends AbstractController
             'data' => [
                 'token' => $token,
                 'user'  => [
-                    'id'    => $user->getId(),
-                    'email' => $user->getEmail(),
-                    'name'  => $user->getName(),
-                    'role'  => $user->getRole(),
+                    'id'     => $user->getId(),
+                    'email'  => $user->getEmail(),
+                    'name'   => $user->getName(),
+                    'role'   => $user->getRole(),
+                    'avatar' => $user->getAvatar(),
                 ],
             ],
         ], 201);
@@ -86,10 +87,11 @@ final class ApiAuthController extends AbstractController
         return $this->json([
             'success' => true,
             'data' => [
-                'id'    => $user->getId(),
-                'email' => $user->getEmail(),
-                'name'  => $user->getName(),
-                'role'  => $user->getRole(),
+                'id'     => $user->getId(),
+                'email'  => $user->getEmail(),
+                'name'   => $user->getName(),
+                'role'   => $user->getRole(),
+                'avatar' => $user->getAvatar(),
             ],
         ]);
     }

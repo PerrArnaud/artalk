@@ -3,8 +3,10 @@
 namespace App\Controller\Api;
 
 use App\Entity\Comment;
+use App\Entity\CommentLike;
 use App\Entity\Report;
 use App\Entity\User;
+use App\Repository\CommentLikeRepository;
 use App\Repository\CommentRepository;
 use App\Repository\MOTWRepository;
 use App\Repository\ReportRepository;
@@ -72,6 +74,8 @@ final class ApiCommentController extends AbstractController
                 'motwSlug'              => $motw->getSlug(),
                 'parentCommentId'       => $comment->getComment()?->getId(),
                 'reportedByCurrentUser' => false,
+                'likesCount'            => 0,
+                'likedByCurrentUser'    => false,
                 'replies'               => [],
             ],
         ], 201);
@@ -115,6 +119,44 @@ final class ApiCommentController extends AbstractController
         $em->flush();
 
         return $this->json(['success' => true, 'message' => 'Report submitted successfully.'], 201);
+    }
+
+    #[Route('/comments/{id}/like', name: 'api_comment_like', methods: ['POST'])]
+    public function like(
+        Comment $comment,
+        CommentLikeRepository $commentLikeRepository,
+        EntityManagerInterface $em,
+        #[CurrentUser] User $user,
+    ): JsonResponse {
+        $existing = $commentLikeRepository->findOneByCommentAndUser($comment, $user);
+
+        if ($existing !== null) {
+            $em->remove($existing);
+            $em->flush();
+
+            $likesCount = $commentLikeRepository->count(['comment' => $comment]);
+
+            return $this->json([
+                'success'    => true,
+                'liked'      => false,
+                'likesCount' => $likesCount,
+            ]);
+        }
+
+        $like = new CommentLike();
+        $like->setComment($comment);
+        $like->setUser($user);
+
+        $em->persist($like);
+        $em->flush();
+
+        $likesCount = $commentLikeRepository->count(['comment' => $comment]);
+
+        return $this->json([
+            'success'    => true,
+            'liked'      => true,
+            'likesCount' => $likesCount,
+        ], 201);
     }
 }
 

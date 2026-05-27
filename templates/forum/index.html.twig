@@ -156,6 +156,60 @@
         padding: 0.2rem 0.65rem;
         margin-top: 0.4rem;
     }
+
+    .pagination-bar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+
+    .page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 38px;
+        padding: 0 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.2s, color 0.2s;
+        border: 1px solid #dee2e6;
+        color: #007bff;
+        background: white;
+    }
+
+    .page-btn:hover:not(.disabled):not(.active) {
+        background: #e9ecef;
+        color: #0056b3;
+    }
+
+    .page-btn.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+        pointer-events: none;
+    }
+
+    .page-btn.disabled {
+        color: #adb5bd;
+        pointer-events: none;
+        border-color: #dee2e6;
+    }
+
+    .page-ellipsis {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 38px;
+        color: #6c757d;
+        font-size: 14px;
+    }
 </style>
 
 <div class="forum-container">
@@ -209,6 +263,34 @@
                 </div>
             </div>
         {% endfor %}
+    {% endif %}
+
+    {% if motws.totalItemCount > 10 %}
+        {% set totalPages = (motws.totalItemCount / motws.itemNumberPerPage)|round(0, 'ceil') %}
+        {% set currentPage = motws.currentPageNumber %}
+        <div class="pagination-bar">
+            {% if currentPage > 1 %}
+                <a href="{{ path('app_forum', {page: currentPage - 1, artType: selectedArtType}) }}" class="page-btn">‹ Précédent</a>
+            {% else %}
+                <span class="page-btn disabled">‹ Précédent</span>
+            {% endif %}
+
+            {% for i in 1..totalPages %}
+                {% if i == currentPage %}
+                    <span class="page-btn active">{{ i }}</span>
+                {% elseif i == 1 or i == totalPages or (i >= currentPage - 2 and i <= currentPage + 2) %}
+                    <a href="{{ path('app_forum', {page: i, artType: selectedArtType}) }}" class="page-btn">{{ i }}</a>
+                {% elseif (i == currentPage - 3 and currentPage - 3 > 1) or (i == currentPage + 3 and currentPage + 3 < totalPages) %}
+                    <span class="page-ellipsis">…</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if currentPage < totalPages %}
+                <a href="{{ path('app_forum', {page: currentPage + 1, artType: selectedArtType}) }}" class="page-btn">Suivant ›</a>
+            {% else %}
+                <span class="page-btn disabled">Suivant ›</span>
+            {% endif %}
+        </div>
     {% endif %}
 </div>
 {% endblock %}

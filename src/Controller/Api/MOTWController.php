@@ -51,7 +51,7 @@ class MOTWController extends AbstractController
                 'date' => $motw->getDate()->format('Y-m-d'),
                 'datePost' => $motw->getDatePost()->format('Y-m-d'),
                 'slug' => $motw->getSlug(),
-                'visual' => $motw->getFullVisualUrl(),
+                'visual' => $motw->getVisual(),
                 'commentCount' => $motw->getCommentCount(),
                 'artType' => $motw->getArtType() ? [
                     'id' => $motw->getArtType()->getId(),
@@ -93,7 +93,7 @@ class MOTWController extends AbstractController
                 'date' => $motw->getDate()->format('Y-m-d'),
                 'datePost' => $motw->getDatePost()->format('Y-m-d'),
                 'slug' => $motw->getSlug(),
-                'visual' => $motw->getFullVisualUrl(),
+                'visual' => $motw->getVisual(),
                 'commentCount' => $motw->getCommentCount()
             ]
         ]);
